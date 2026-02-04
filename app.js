@@ -80,6 +80,21 @@ class DataManager {
         return schedule;
     }
 
+    updateSchedule(id, updates) {
+        const index = this.schedules.findIndex(s => s.id === id);
+        if (index !== -1) {
+            this.schedules[index] = { ...this.schedules[index], ...updates };
+            this.saveData('schedules', this.schedules);
+            return this.schedules[index];
+        }
+        return null;
+    }
+
+    deleteSchedule(id) {
+        this.schedules = this.schedules.filter(s => s.id !== id);
+        this.saveData('schedules', this.schedules);
+    }
+
     clearSchedules() {
         this.schedules = [];
         this.saveData('schedules', this.schedules);
@@ -487,10 +502,11 @@ class UIManager {
                     <table class="schedule-table">
                         <thead>
                             <tr>
-                                <th style="width: 30%">日期</th>
-                                <th style="width: 15%">星期</th>
-                                <th style="width: 30%">负责人</th>
-                                <th style="width: 25%">活动名称</th>
+                                <th style="width: 25%">日期</th>
+                                <th style="width: 12%">星期</th>
+                                <th style="width: 25%">负责人</th>
+                                <th style="width: 20%">活动名称</th>
+                                <th style="width: 18%">操作</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -512,6 +528,10 @@ class UIManager {
                                             <span class="schedule-member">${schedule.memberName}</span>
                                         </td>
                                         <td>${schedule.activityName}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary" onclick="uiManager.editSchedule('${schedule.id}')">编辑</button>
+                                            <button class="btn btn-sm btn-danger" onclick="uiManager.deleteSchedule('${schedule.id}')">删除</button>
+                                        </td>
                                     </tr>
                                 `;
                             }).join('')}
@@ -579,6 +599,83 @@ class UIManager {
             alert('排班计划生成成功！');
         } catch (error) {
             alert(error.message);
+        }
+    }
+
+    // ==================== 编辑和删除排班 ====================
+    editSchedule(id) {
+        const schedule = this.dataManager.schedules.find(s => s.id === id);
+        if (!schedule) return;
+
+        const activeMembers = this.dataManager.getActiveMembers();
+
+        const modalBody = document.getElementById('modalBody');
+        modalBody.innerHTML = `
+            <h2>编辑排班</h2>
+            <form id="editScheduleForm">
+                <div class="form-group">
+                    <label>活动名称</label>
+                    <input type="text" value="${schedule.activityName}" disabled>
+                </div>
+                <div class="form-group">
+                    <label>日期 *</label>
+                    <input type="date" id="scheduleDate" value="${schedule.date}" required>
+                </div>
+                <div class="form-group">
+                    <label>负责人 *</label>
+                    <select id="scheduleMember" required>
+                        ${activeMembers.map(member => `
+                            <option value="${member.id}" ${member.id === schedule.memberId ? 'selected' : ''}>
+                                ${member.name}
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="uiManager.closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        `;
+
+        document.getElementById('editScheduleForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.updateSchedule(id);
+        });
+
+        this.openModal();
+    }
+
+    updateSchedule(id) {
+        const date = document.getElementById('scheduleDate').value;
+        const memberId = document.getElementById('scheduleMember').value;
+        const member = this.dataManager.members.find(m => m.id === memberId);
+
+        if (!member) {
+            alert('未找到选中的成员');
+            return;
+        }
+
+        const updates = {
+            date: date,
+            memberId: member.id,
+            memberName: member.name
+        };
+
+        this.dataManager.updateSchedule(id, updates);
+        this.closeModal();
+        this.renderScheduleTable();
+        alert('排班更新成功！');
+    }
+
+    deleteSchedule(id) {
+        const schedule = this.dataManager.schedules.find(s => s.id === id);
+        if (!schedule) return;
+
+        if (confirm(`确定要删除 ${schedule.date} 的 ${schedule.activityName} 排班吗？`)) {
+            this.dataManager.deleteSchedule(id);
+            this.renderScheduleTable();
+            alert('排班已删除');
         }
     }
 
