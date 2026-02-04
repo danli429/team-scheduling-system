@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>团队排班系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗓️ 团队排班系统</h1>
+            <p class="subtitle">管理团队活动，自动生成排班计划</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="schedule">📅 排班日历</button>
+            <button class="tab-btn" data-tab="members">👥 成员管理</button>
+            <button class="tab-btn" data-tab="activities">🎯 活动管理</button>
+            <button class="tab-btn" data-tab="settings">⚙️ 系统设置</button>
+        </nav>
+
+        <main>
+            <!-- 排班表格 -->
+            <section id="schedule" class="tab-content active">
+                <div class="section-header">
+                    <h2>排班表</h2>
+                    <div>
+                        <button class="btn btn-secondary" id="filterScheduleBtn">📅 筛选日期</button>
+                        <button class="btn btn-primary" id="generateScheduleBtn">🔄 生成排班</button>
+                    </div>
+                </div>
+
+                <div class="schedule-filter" id="scheduleFilter" style="display: none;">
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div>
+                            <label>开始日期：</label>
+                            <input type="date" id="filterStartDate" class="filter-input">
+                        </div>
+                        <div>
+                            <label>结束日期：</label>
+                            <input type="date" id="filterEndDate" class="filter-input">
+                        </div>
+                        <button class="btn btn-sm btn-primary" id="applyFilterBtn">应用筛选</button>
+                        <button class="btn btn-sm btn-secondary" id="clearFilterBtn">清除筛选</button>
+                    </div>
+                </div>
+
+                <div id="scheduleTableContainer"></div>
+            </section>
+
+            <!-- 成员管理 -->
+            <section id="members" class="tab-content">
+                <div class="section-header">
+                    <h2>成员管理</h2>
+                    <button class="btn btn-primary" id="addMemberBtn">+ 添加成员</button>
+                </div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalMembers">0</div>
+                        <div class="stat-label">团队成员</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="activeMembers">0</div>
+                        <div class="stat-label">活跃成员</div>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="membersTable">
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>邮箱</th>
+                                <th>状态</th>
+                                <th>参与次数</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 活动管理 -->
+            <section id="activities" class="tab-content">
+                <div class="section-header">
+                    <h2>活动管理</h2>
+                    <button class="btn btn-primary" id="addActivityBtn">+ 添加活动</button>
+                </div>
+                <div class="activity-grid" id="activityGrid"></div>
+            </section>
+
+            <!-- 系统设置 -->
+            <section id="settings" class="tab-content">
+                <div class="section-header">
+                    <h2>系统设置</h2>
+                </div>
+                <div class="settings-panel">
+                    <div class="setting-item">
+                        <label>排班算法</label>
+                        <select id="algorithmSelect">
+                            <option value="rotation">轮流排班</option>
+                            <option value="random">随机分配</option>
+                            <option value="balanced">均衡分配</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="notificationEnabled" checked>
+                            启用通知提醒
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>提前提醒天数</label>
+                        <input type="number" id="notificationDays" value="3" min="1" max="30">
+                    </div>
+                    <div class="setting-item">
+                        <button class="btn btn-secondary" id="exportDataBtn">📥 导出数据</button>
+                        <button class="btn btn-secondary" id="importDataBtn">📤 导入数据</button>
+                        <input type="file" id="importDataFile" style="display: none;" accept=".json">
+                    </div>
+                    <div class="setting-item">
+                        <button class="btn btn-danger" id="clearDataBtn">🗑️ 清除所有数据</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 弹窗模板 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
